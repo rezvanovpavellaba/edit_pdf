@@ -35,28 +35,18 @@ def Page2():
         :param df: DataFrame с данными для замены
         :param page_number: Номер страницы для обработки
         """
+        df['Page'] = df['Page'].astype(str)
+
         # Фильтруем данные для текущей страницы
-        df_page = df[df['Page'] == page_number]
+        df_page = df[df['Page'] == str(page_number)]
 
         for i, raw_text in enumerate(df_page['Old Value'].values):
             #сам поиск текста по старым значениям из Excel, который нужно заменить
-            raw_text = str(raw_text)
-
-            if raw_text.endswith('.0'):
-               raw_text = raw_text.rstrip('.0')
-               raw_text = str(int(raw_text))
-            else:
-               raw_text = str(raw_text)
-               
 
             hits = page.search_for(raw_text)
 
-            new_text = str(df_page['New Value'].values[i])
-            if new_text.endswith('.0'):
-               new_text = new_text.rstrip('.0')
-            else:
-               new_text = str(df_page['New Value'].values[i])
-
+            new_text = df_page['New Value'].values[i]
+            
             # Параметры для редактирования
             new_fontsize = 20  # Новый размер шрифта
             new_width = -0.1    # Новая ширина прямоугольника
@@ -105,7 +95,7 @@ def Page2():
 
     if uploaded_pdfs and uploaded_excel:
         # Чтение Excel файла
-        excel_data = pd.read_excel(uploaded_excel, sheet_name=None)
+        excel_data = pd.read_excel(uploaded_excel, sheet_name=None, dtype=str)
 
         processed_files = []
         for pdf_file in uploaded_pdfs:
