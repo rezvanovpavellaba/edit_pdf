@@ -26,38 +26,46 @@ def Page2():
         # Фильтруем данные для текущей страницы
         df_page = df[df['Page'] == str(page_number)]
 
-        for i, raw_text in enumerate(df_page['Old Value'].values):
-            #сам поиск текста по старым значениям из Excel, который нужно заменить
+        for raw_text in df_page['Old Value'].unique():
+            # Фильтруем строки с текущим старым значением
+            df_matches = df_page[df_page['Old Value'] == raw_text]
+            new_values = df_matches['New Value'].values
 
+            # Поиск всех совпадений старого текста на странице
             hits = page.search_for(raw_text)
 
-            new_text = df_page['New Value'].values[i]
-            
-            # Параметры для редактирования
-            new_width = -0.1    # Новая ширина прямоугольника
-            new_width_2 = -14   # Новая ширина прямоугольника
-            new_height = -1.1   # Новая высота прямоугольника
-            new_height_2 = -0.85   # Новая высота прямоугольника
+            # Проверяем соответствие количества совпадений и новых значений
+            if len(hits) != len(new_values):
+                raise ValueError(
+                    f"Количество найденных совпадений ({len(hits)}) и новых значений ({len(new_values)}) для текста '{raw_text}' не совпадает на странице {page_number}."
+                )
 
-            for rect in hits:
+            # Обрабатываем каждое совпадение
+            for rect, new_text in zip(hits, new_values):
+                # Параметры для редактирования
+                new_width = -0.1    # Новая ширина прямоугольника
+                new_width_2 = -14   # Новая ширина прямоугольника
+                new_height = -1.1   # Новая высота прямоугольника
+                new_height_2 = -0.85   # Новая высота прямоугольника
+
+                # Вычисление новых координат
                 x1, y1, x2, y2 = rect
                 new_x1 = x1 + new_width_2
                 new_x2 = x2 + new_width
-                new_y2 = y2 - new_height_2*1.1
+                new_y2 = y2 - new_height_2 * 1.1
                 new_y1 = y1 + new_height
-                new_rect = fitz.Rect(new_x1,new_y1, new_x2, new_y2)
+                new_rect = fitz.Rect(new_x1, new_y1, new_x2, new_y2)
 
                 # Удаляем старый текст через аннотацию
                 page.add_redact_annot(rect)  # Добавляем аннотацию редактирования
                 page.apply_redactions()     # Применяем редактирование
 
-                # Добавляем аннотацию для редактирования
-                # Вставка текста с прозрачным фоном
+                # Вставка нового текста
                 page.insert_textbox(
                     new_rect,
                     new_text,
                     fontsize=7.86,            # Размер шрифта
-                    fontname=page.get_fonts()[1][4],          # Имя шрифта
+                    fontname=page.get_fonts()[1][4],         # Имя шрифта (уточните имя шрифта)
                     align=fitz.TEXT_ALIGN_RIGHT,  # Выравнивание текста
                     color=(0, 0, 0)           # Цвет текста (черный)
                 )
