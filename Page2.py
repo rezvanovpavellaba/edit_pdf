@@ -34,7 +34,6 @@ def Page2():
             new_text = df_page['New Value'].values[i]
             
             # Параметры для редактирования
-            new_fontsize = 7.86  # Новый размер шрифта
             new_width = -0.1    # Новая ширина прямоугольника
             new_width_2 = -14   # Новая ширина прямоугольника
             new_height = -1.1   # Новая высота прямоугольника
@@ -48,14 +47,20 @@ def Page2():
                 new_y1 = y1 + new_height
                 new_rect = fitz.Rect(new_x1,new_y1, new_x2, new_y2)
 
-                # Добавляем аннотацию для редактирования
-                page.add_redact_annot(new_rect, new_text,
-                                    fontsize=new_fontsize,
-                                    fontname=page.get_fonts()[1][4],
-                                    align=fitz.TEXT_ALIGN_RIGHT)
+                # Удаляем старый текст через аннотацию
+                page.add_redact_annot(rect)  # Добавляем аннотацию редактирования
+                page.apply_redactions()     # Применяем редактирование
 
-            # Применяем редактирование
-            page.apply_redactions()
+                # Добавляем аннотацию для редактирования
+                # Вставка текста с прозрачным фоном
+                page.insert_textbox(
+                    new_rect,
+                    new_text,
+                    fontsize=7.86,            # Размер шрифта
+                    fontname=page.get_fonts()[1][4],          # Имя шрифта
+                    align=fitz.TEXT_ALIGN_RIGHT,  # Выравнивание текста
+                    color=(0, 0, 0)           # Цвет текста (черный)
+                )
 
     def process_pdf(pdf_file, excel_data, sheet_name):
         """Обрабатывает PDF файл, редактируя текст на основе данных Excel."""
