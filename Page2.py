@@ -34,7 +34,7 @@ def Page2():
             new_text = df_page['New Value'].values[i]
             
             # Параметры для редактирования
-            new_fontsize = 20  # Новый размер шрифта
+            new_fontsize = 7.86  # Новый размер шрифта
             new_width = -0.1    # Новая ширина прямоугольника
             new_width_2 = -14   # Новая ширина прямоугольника
             new_height = -1.1   # Новая высота прямоугольника
@@ -50,8 +50,8 @@ def Page2():
 
                 # Добавляем аннотацию для редактирования
                 page.add_redact_annot(new_rect, new_text,
-                                    fontname=page.get_fonts()[1][4],
                                     fontsize=new_fontsize,
+                                    fontname=page.get_fonts()[1][4],
                                     align=fitz.TEXT_ALIGN_RIGHT)
 
             # Применяем редактирование
