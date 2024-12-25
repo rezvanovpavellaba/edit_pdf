@@ -1,31 +1,17 @@
+
+
+    
+
+    
+
+
+
 def Page2():
 
     import streamlit as st
     import fitz  # PyMuPDF
     import pandas as pd
-    import os
     from io import BytesIO
-
-    def extract_volunteer_and_period(filename):
-        """
-        Извлекает номер добровольца и период из имени файла.
-        Номер добровольца — после первого тире, ближайшего к точке.
-        Номер периода — перед точкой.
-        """
-        # Убираем расширение файла, используя rsplit от точки
-        base_name = filename.rsplit('.', 1)[0]
-
-        # Ищем части до точки
-        parts = base_name.split('-')
-        
-        if len(parts) >= 2:
-            # Номер добровольца — после первого тире
-            volunteer = parts[-2]  # Второй элемент справа
-            # Номер периода — ближайший элемент к точке
-            period = parts[-1]  # Последний элемент до точки
-            return volunteer, period
-        
-        return None, None
 
     def redact_text_on_page(page, df, page_number):
         """
@@ -71,16 +57,14 @@ def Page2():
             # Применяем редактирование
             page.apply_redactions()
 
-    def process_pdf(pdf_file, excel_data):
+    def process_pdf(pdf_file, excel_data, sheet_name):
         """Обрабатывает PDF файл, редактируя текст на основе данных Excel."""
         pdf_bytes = BytesIO(pdf_file.read())
         doc = fitz.open(stream=pdf_bytes, filetype="pdf")
 
-        for sheet_name, sheet_data in excel_data.items():
-            volunteer, period = extract_volunteer_and_period(sheet_name)
-            if volunteer and period:
-                for page_number in range(len(doc)):
-                    redact_text_on_page(doc[page_number], sheet_data, page_number)
+        sheet_data = excel_data[sheet_name]
+        for page_number in range(len(doc)):
+            redact_text_on_page(doc[page_number], sheet_data, page_number)
 
         output = BytesIO()
         doc.save(output)
@@ -88,7 +72,7 @@ def Page2():
         return output
 
     # Streamlit UI
-    st.title("PDF и Excel процессор для редактирования")
+    st.title("PDF и Excel обработчик для редактирования")
 
     uploaded_pdfs = st.file_uploader("Загрузите PDF файлы", type="pdf", accept_multiple_files=True)
     uploaded_excel = st.file_uploader("Загрузите Excel файл", type="xlsx")
@@ -99,12 +83,16 @@ def Page2():
 
         processed_files = []
         for pdf_file in uploaded_pdfs:
-            volunteer, period = extract_volunteer_and_period(pdf_file.name)
-            matching_sheets = {name: data for name, data in excel_data.items() if volunteer in name and period in name}
+            # Убираем расширение у имени PDF файла
+            pdf_name = pdf_file.name.rsplit('.', 1)[0]
+            
 
-            if matching_sheets:
-                processed_pdf = process_pdf(pdf_file, matching_sheets)
+            # Проверяем совпадение между именем PDF и листами Excel
+            if pdf_name in excel_data:
+                processed_pdf = process_pdf(pdf_file, excel_data, pdf_name)
                 processed_files.append((pdf_file.name, processed_pdf))
+            else:
+                st.warning(f"Лист Excel для файла {pdf_file.name} не найден.")
 
         if processed_files:
             for name, processed_pdf in processed_files:
