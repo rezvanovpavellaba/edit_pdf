@@ -26,12 +26,6 @@ def Page2():
             # Поиск всех совпадений старого текста на странице
             hits = page.search_for(raw_text)
 
-            # Проверяем соответствие количества совпадений и новых значений
-            if len(hits) != len(new_values):
-                raise ValueError(
-                    f"Количество найденных совпадений ({len(hits)}) и новых значений ({len(new_values)}) для текста '{raw_text}' не совпадает на странице {page_number}."
-                )
-
             # Обрабатываем каждое совпадение
             for rect, new_text in zip(hits, new_values):
                 # Параметры для редактирования
