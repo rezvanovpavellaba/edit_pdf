@@ -1,17 +1,10 @@
-
-
-    
-
-    
-
-
-
 def Page2():
 
     import streamlit as st
     import fitz  # PyMuPDF
     import pandas as pd
     from io import BytesIO
+    import pikepdf
 
     def redact_text_on_page(page, df, page_number):
         """
@@ -80,7 +73,7 @@ def Page2():
             redact_text_on_page(doc[page_number], sheet_data, page_number)
 
         output = BytesIO()
-        doc.save(output)
+        doc.save(output, garbage=4, deflate=True)
         doc.close()
         return output
 
