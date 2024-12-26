@@ -538,13 +538,10 @@ def Page1():
                     text_format = workbook.add_format({'num_format': '@'})  # Формат для текста
 
                     for sheet_name, df in st.session_state["excel_sheets"].items():
-                        compounds = df["Compound_name"].unique()
-                        for compound in compounds:
-                            compound_df = df[df["Compound_name"] == compound].copy()
-
+                        
                             # Фильтруем строки, где newConc и newResponse не пусты
-                            filtered_df = compound_df[
-                                (compound_df["newConc"].notna()) & (compound_df["newResponse"].notna())
+                            filtered_df = df[
+                                (df["newConc"].notna()) & (df["newResponse"].notna())
                             ]
 
                             if not filtered_df.empty:
@@ -552,14 +549,13 @@ def Page1():
                                 result_df = pd.DataFrame({
                                     "Old Value": list(filtered_df["Response"]) + list(filtered_df["Conc"]) + list(filtered_df["Create_time"]),
                                     "New Value": list(filtered_df["newResponse"]) + list(filtered_df["newConc"]) + list(filtered_df["newCreate_time"]),
-                                    "Page": [
-                                        page_inputs[(sheet_name, compound)]["newResponse_page"]
-                                    ] * len(filtered_df["newResponse"]) + [
-                                        page_inputs[(sheet_name, compound)]["newConc_page"]
-                                    ] * len(filtered_df["newConc"]) +
-                                    [
-                                        page_inputs[(sheet_name, compound)]["newCreate_time_page"]
-                                    ] * len(filtered_df["newCreate_time"])
+                                    "Page": sum([
+                                        [
+                                            page_inputs[(sheet_name, row["Compound_name"])][f"{key}_page"]
+                                            for _, row in filtered_df.iterrows()
+                                        ]
+                                        for key in ["newResponse", "newConc", "newCreate_time"]
+                                    ], [])
                                 })
 
                                 # Удаляем строки, где New Value пустое
@@ -577,9 +573,7 @@ def Page1():
                                 ]
 
                                 # Формируем название листа
-                                clean_sheet_name = (
-                                    f"{sheet_name.replace('.xml', '').replace('.', '_')}_{compound}"
-                                )[:31]  # Ограничение по длине имени листа
+                                clean_sheet_name = f"{sheet_name.replace('.xml', '').replace('.', '_')}"[:31]  # Ограничение по длине имени листа
 
                                 # Записываем результат на новый лист
                                 result_df.to_excel(new_writer, index=False, sheet_name=clean_sheet_name)
