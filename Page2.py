@@ -4,7 +4,6 @@ def Page2():
     import fitz  # PyMuPDF
     import pandas as pd
     from io import BytesIO
-    import pikepdf
 
     def redact_text_on_page(page, df, page_number):
         """
