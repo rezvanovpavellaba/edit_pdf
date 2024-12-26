@@ -99,10 +99,6 @@ def Page1():
 
         return [format_number(x) for x in data]
     
-    def update_page_input(key, value):
-        st.session_state[key] = value
-
-
     # Streamlit приложение
     st.title("XML & JSON Integration for Excel Export")
 
@@ -498,34 +494,26 @@ def Page1():
                               
                               
                               # Уникальные ключи для виджетов
-                              key_newConc = f"newConc_{sheet_name}_{compound}_value"
-                              key_newResponse = f"newResponse_{sheet_name}_{compound}_value"
+                              key_newConc_newResponse  = f"newConc_newResponse _{sheet_name}_{compound}_value"
                               key_newCreate_time = f"newCreate_time_{sheet_name}_{compound}_value"
                               
                               # Инициализация значений виджетов
-                              if key_newConc not in st.session_state:
-                                  st.session_state[key_newConc] = 1
-                              if key_newResponse not in st.session_state:
-                                  st.session_state[key_newResponse] = 1
+                              if key_newConc_newResponse not in st.session_state:
+                                  st.session_state[key_newConc_newResponse] = 1
                               if key_newCreate_time not in st.session_state:
-                                  st.session_state[key_newCreate_time] = 1
+                                  st.session_state[key_newCreate_time] = 0
 
-                              st.session_state[key_newConc] = st.number_input(
-                                  f"Page for newConc ({compound})", min_value=0, step=1, value=st.session_state[key_newConc], key=f"key_{key_newConc}"
+                              st.session_state[key_newConc_newResponse] = st.number_input(
+                                  f"Page for newConc and newResponse ({compound})", min_value=0, step=1, value=st.session_state[key_newConc_newResponse], key=f"key_{key_newConc_newResponse}"
                               )
                           
-                              st.session_state[key_newResponse] = st.number_input(
-                                  f"Page for newResponse ({compound})", min_value=0, step=1, value=st.session_state[key_newResponse], key=f"key_{key_newResponse}"
-                              )
-
                               st.session_state[key_newCreate_time] = st.number_input(
                                   f"Page for newCreate_time ({compound})", min_value=0, step=1, value=st.session_state[key_newCreate_time], key=f"key_{key_newCreate_time}"
                               )
 
                               # Сохраняем значения в сессию
                               page_inputs[(sheet_name, compound)] = {
-                                  "newConc_page": st.session_state[key_newConc],
-                                  "newResponse_page": st.session_state[key_newResponse],
+                                  "newConc_newResponse_page": st.session_state[key_newConc_newResponse],
                                   "newCreate_time_page": st.session_state[key_newCreate_time],
                               }
 
@@ -554,7 +542,7 @@ def Page1():
                                             page_inputs[(sheet_name, row["Compound_name"])][f"{key}_page"]
                                             for _, row in filtered_df.iterrows()
                                         ]
-                                        for key in ["newResponse", "newConc", "newCreate_time"]
+                                        for key in ["newConc_newResponse","newConc_newResponse", "newCreate_time"]
                                     ], [])
                                 })
 
